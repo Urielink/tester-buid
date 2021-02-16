@@ -67,6 +67,55 @@ function create_block_tester_buid_block_init() {
 					'type' => 'string',
 					'default' => '',
 				],
+				// panel
+				'ChooseType' => [
+					'type' => 'string',
+					'default' => 'posts',
+				],
+				'SetIds' => [
+					'type' => 'array', // multiples valores seleccionados.
+					'default' => '',
+				],
+				'SetAmount' => [
+					'type' => 'number',
+					'default' => 3,
+				],
+				'SetOrderBy' => [
+					'type' => 'string',
+					'default' => 'date',
+				],
+				'SetColumns' => [
+					'type' => 'number',
+					'default' => 1,
+				],
+				'FindBlock' => [
+					'type' => 'string',
+					'default' => 'none',
+				],
+				'AllowMixed' => [
+					'type' => 'boolean',
+					'default' => false,
+				],
+				'AddControls' => [
+					'type' => 'boolean',
+					'default' => true,
+				],
+				'AddIndicators' => [
+					'type' => 'boolean',
+					'default' => true,
+				],
+				'SetAuto' => [
+					'type' => 'boolean',
+					'default' => true,
+				],
+				'SetTime' => [
+					'type' => 'number',
+					'default' => '5000',
+				],
+				'SetAnimation' => [
+					'type' => 'string',
+					'default' => '',
+				],
 			]
 		)
 	);
@@ -80,27 +129,63 @@ add_action( 'init', 'create_block_tester_buid_block_init' );
  */
 
 function dynamic_render_callback( $block_attributes, $content ) {
-    // $recent_posts = wp_get_recent_posts( array(
-    //     'numberposts' => 1,
-    //     'post_status' => 'publish',
-    // ) );
-    // if ( count( $recent_posts ) === 0 ) {
-    //     return 'No posts';
-    // }
-    // $post = $recent_posts[ 0 ];
-    // $post_id = $post['ID'];
-    // return sprintf(
-    //     '<a class="wp-block-my-plugin-latest-post" href="%1$s">%2$s</a>',
-    //     esc_url( get_permalink( $post_id ) ),
-    //     esc_html( get_the_title( $post_id ) )
-    // );
+
+	$carousel_args  = '';
+
+	if ( 'posts' !== $block_attributes['ChooseType'] ){
+		$carousel_args  .= 'type="' . $block_attributes['ChooseType'] . '" ';
+	}
+
+	if ( $block_attributes['SetIds'] ) {
+		$array_to_string = implode( ",", $block_attributes['SetIds'] );
+		$carousel_args  .= 'id="' . $array_to_string . '" ';
+	}
+
+	if ( '3' !==  $block_attributes['SetAmount'] && 'posts' === $block_attributes['ChooseType'] ){
+		$carousel_args .= 'amount="' . $block_attributes['SetAmount'] . '" ';
+	}
+
+	if ( 'date' !== $block_attributes['SetOrderBy'] && 'posts' === $block_attributes['ChooseType'] ) {
+		$carousel_args .= 'orderby="' . $block_attributes['SetOrderBy'] . '" ';
+	}
+
+	if ( 'none' !== $block_attributes['FindBlock'] && 'posts' === $block_attributes['ChooseType'] ){
+		$carousel_args .= 'block="' . $block_attributes['FindBlock'] . '" ';
+	}
+
+	if ( 'none' !== $block_attributes['FindBlock'] && false !== $block_attributes['AllowMixed'] && 'posts' === $block_attributes['ChooseType'] ){
+		$carousel_args .= 'mixed="true" ';
+	}
+
+	if ( 1 !== $block_attributes['SetColumns'] ){
+		$carousel_args .= 'columns="' . $block_attributes['SetColumns'] . '" '; // fix en editor.
+	}
+	if ( false === $block_attributes['AddControls'] ){
+		$carousel_args .= 'control="false" ';
+	}
+	if ( false === $block_attributes['AddIndicators'] ){
+		$carousel_args .= 'indicators="false" ';
+	}
+	if ( false === $block_attributes['SetAuto'] ){
+		$carousel_args .= 'auto="false" ';
+	}
+	if ( '5000' !== $block_attributes['SetTime'] ){
+		$carousel_args .= 'time="' . $block_attributes['SetTime'] . '" ';
+	}
+	if ( '' !== $block_attributes['SetAnimation'] ){
+		$carousel_args .= 'animation="' . $block_attributes['SetAnimation'] . '" ';
+	}
 
 	$align = '';
 	if ( '' !== $block_attributes['align'] ){
 		$align = ' class="align' . $block_attributes['align'] . '"';
 	}
 
-	return '<div' . $align . '>' . do_shortcode('[ekiline-carousel type="images" id="611,1045,49,50,52,51"]') . '</div>';
+	$carousel = '<div' . $align . '>' . do_shortcode('[ekiline-carousel ' . $carousel_args . ']') . '</div>';
+	// $carousel .= '<p>' . $align . '&nbsp; ' . $carousel_args . '</p>';
+	return $carousel;
+
+	// return '<div' . $align . '>' . do_shortcode('[ekiline-carousel type="images" id="611,1045,49,50,52,51"]') . '</div>';
 }
 
 
